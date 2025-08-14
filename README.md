@@ -1,5 +1,3 @@
-Here’s your text reformatted to follow **GitHub Markdown best practices** — with clear headings, bullet lists, fenced code blocks, and consistent styling so it looks clean in a repo README.md:
-
 ````markdown
 # IIS Installation Script Generator
 
