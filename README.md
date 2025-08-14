@@ -1,3 +1,6 @@
+Here’s your text reformatted to follow **GitHub Markdown best practices** — with clear headings, bullet lists, fenced code blocks, and consistent styling so it looks clean in a repo README.md:
+
+````markdown
 # IIS Installation Script Generator
 
 A simple, self-contained web application that helps Windows Server administrators generate PowerShell scripts to automate the installation of Internet Information Services (IIS) and its selected features.
@@ -40,3 +43,49 @@ The generated script is designed to be run on a Windows Server.
 3. **Navigate to Script Location**:
    ```powershell
    cd C:\Users\Administrator\Downloads
+````
+
+4. **Execute the Script**:
+
+   ```powershell
+   .\install_iis.ps1
+   ```
+5. **Handle Execution Policy (if needed)**:
+   If you see an error about script execution being disabled:
+
+   ```powershell
+   Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+   ```
+
+   After running the script, revert the policy if desired:
+
+   ```powershell
+   Set-ExecutionPolicy Restricted -Scope CurrentUser
+   ```
+
+---
+
+## 🛠️ Technologies Used
+
+* **HTML5** – Structure of the web page.
+* **Tailwind CSS** – For rapid and responsive styling.
+* **React (via CDN)** – Interactive UI building.
+* **Babel (via CDN)** – Transpiling JSX in the browser.
+* **PowerShell** – Windows Server automation scripting.
+
+---
+
+## 💡 Future Enhancements
+
+* **Additional Program Installation** – Add options for installing other common server applications (e.g., .NET Core Hosting Bundle, SQL Server Express) in sequence after IIS.
+* **Advanced IIS Configuration** – Options for site creation, application pool setup, and binding configurations.
+* **Script Validation** – More robust checks before script generation.
+* **Improved Error Handling** – Better diagnostics and logging in generated scripts.
+* **Theming Options** – Switch between different visual themes for the web app.
+
+```
+
+This will display perfectly on GitHub with nice **section separation**, readable lists, and proper **code highlighting** for PowerShell commands.  
+
+If you want, I can also make a **version with a clickable table of contents** so GitHub auto-links each section. That would make it even more polished.
+```
