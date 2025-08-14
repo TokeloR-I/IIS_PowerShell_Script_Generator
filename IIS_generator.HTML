@@ -92,30 +92,31 @@
 
           // Function to generate the PowerShell script
           const generateScript = () => {
-            let script = `# PowerShell Script to Install IIS Features\\n`;
-            script += `# Run this script on your Windows Server with Administrative Privileges.\\n\\n`;
-            script += `Write-Host "Starting IIS feature installation..." -ForegroundColor Green\\n\\n`;
+            // Fix: Replaced \\n with \n for correct newlines in PowerShell script
+            let script = `# PowerShell Script to Install IIS Features\n`;
+            script += `# Run this script on your Windows Server with Administrative Privileges.\n\n`;
+            script += `Write-Host "Starting IIS feature installation..." -ForegroundColor Green\n\n`;
 
             // Filter only selected features and ensure Web-Server is always included if any feature is selected
             const featuresToInstall = Object.keys(selectedFeatures).filter(feature => selectedFeatures[feature]);
 
             if (featuresToInstall.length === 0) {
-              script += `Write-Warning "No IIS features selected for installation. Please select features and try again."\\n`;
+              script += `Write-Warning "No IIS features selected for installation. Please select features and try again."\n`;
             } else {
-              script += `try {\\n`;
-              script += `  Write-Host "Attempting to install: ${featuresToInstall.join(', ')}"\\n`;
-              script += `  Add-WindowsFeature -Name ${featuresToInstall.map(f => `'${f}'`).join(', ')} -IncludeManagementTools -Confirm:$false\\n`;
-              script += `  Write-Host "IIS features installed successfully!" -ForegroundColor Green\\n`;
-              script += `} catch {\\n`;
-              script += `  Write-Error "An error occurred during IIS feature installation: $($_.Exception.Message)"\\n`;
-              script += `  exit 1\\n`; // Exit with an error code
-              script += `}\\n\\n`;
+              script += `try {\n`;
+              script += `  Write-Host "Attempting to install: ${featuresToInstall.join(', ')}"\n`;
+              script += `  Add-WindowsFeature -Name ${featuresToInstall.map(f => `'${f}'`).join(', ')} -IncludeManagementTools -Confirm:$false\n`;
+              script += `  Write-Host "IIS features installed successfully!" -ForegroundColor Green\n`;
+              script += `} catch {\n`;
+              script += `  Write-Error "An error occurred during IIS feature installation: $($_.Exception.Message)"\n`;
+              script += `  exit 1\n`; // Exit with an error code
+              script += `}\n\n`;
             }
 
-            script += `# --- Placeholder for subsequent program installations ---\\n`;
-            script += `# After IIS and its selected features are installed, you can add commands here to install other programs.\\n`;
-            script += `# Example: Start-Process -FilePath "C:\\Path\\To\\Your\\Installer.exe" -ArgumentList "/S /INSTALL" -Wait\\n\\n`;
-            script += `Write-Host "Script execution completed." -ForegroundColor Green\\n`;
+            script += `# --- Placeholder for subsequent program installations ---\n`;
+            script += `# After IIS and its selected features are installed, you can add commands here to install other programs.\n`;
+            script += `# Example: Start-Process -FilePath "C:\\Path\\To\\Your\\Installer.exe" -ArgumentList "/S /INSTALL" -Wait\n\n`;
+            script += `Write-Host "Script execution completed." -ForegroundColor Green\n`;
 
             setPowershellScript(script);
             setShowScriptArea(true);
