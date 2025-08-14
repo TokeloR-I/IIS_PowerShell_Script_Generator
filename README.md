@@ -1,4 +1,4 @@
-````markdown
+
 # IIS Installation Script Generator
 
 A simple, self-contained web application that helps Windows Server administrators generate PowerShell scripts to automate the installation of Internet Information Services (IIS) and its selected features.
@@ -41,7 +41,7 @@ The generated script is designed to be run on a Windows Server.
 3. **Navigate to Script Location**:
    ```powershell
    cd C:\Users\Administrator\Downloads
-````
+
 
 4. **Execute the Script**:
 
