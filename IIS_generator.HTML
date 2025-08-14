@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIS Installation Script Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <!-- React and ReactDOM CDNs -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel CDN for JSX transpilation in browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-800 to-indigo-900 text-white flex items-center justify-center p-4 sm:p-8">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Import React hooks from the global React object
+        const { useState } = React;
+
+        // Main App component
+        const App = () => {
+          // State to manage selected IIS features
+          const [selectedFeatures, setSelectedFeatures] = useState({
+            'Web-Server': true,
+            // Performance features from screenshot
+            'Web-Dyn-Compression': true, // Dynamic Content Compression
+
+            // Security features from screenshot
+            'Web-Windows-Auth': true, // Windows Authentication
+            'Web-Request-Filtering': false, // Request Filtering (unchecked in image, keep as option)
+            'Web-Basic-Auth': false, // Basic Authentication
+            'Web-CertProvider': false, // Centralized SSL Certificate Support
+            'Web-Client-Auth': false, // Client Certificate Mapping Authentication
+            'Web-Digest-Auth': false, // Digest Authentication
+            'Web-Cert-Auth': false, // IIS Client Certificate Mapping Authentication
+            'Web-IP-Security': false, // IP and Domain Restrictions
+            'Web-Url-Auth': false, // URL Authorization
+
+
+            // Application Development features from screenshot
+            'Web-Net-Ext': false,       // .NET Extensibility 3.5
+            'Web-Net-Ext45': true,     // .NET Extensibility 4.8 (often mapped to 4.5 feature for simplicity)
+            'Web-AppInit': true,       // Application Initialization
+            'Web-ASP': true,           // ASP
+            'Web-Asp-Net': false,       // ASP.NET 3.5 (specific feature for 3.5)
+            'Web-Asp-Net45': true,     // ASP.NET 4.8 (same as Web-Net-Ext45 if already selected for 4.8)
+            'Web-CGI': true,           // CGI
+            'Web-ISAPI-Ext': true,     // ISAPI Extensions
+            'Web-ISAPI-Filter': true,  // ISAPI Filters
+            'Web-Includes': false,      // Server Side Includes
+            'Web-WebSockets': true,    // WebSocket Protocol
+
+            // Other general IIS features (from previous version, keeping as options)
+            'Web-Stat-Content': false, // Static Content (was Web-Stat-Content, renamed in UI for clarity)
+            'Web-Default-Doc': false,
+            'Web-Dir-Browsing': false,
+            'Web-Http-Errors': false,
+            'Web-Http-Logging': false,
+            'Web-Request-Monitor': false,
+            'Web-Filtering': false, // This seems redundant with Web-Request-Filtering, will keep for now but might be cleaned up later.
+            'Web-Mgmt-Tools': false,
+            'Web-Mgmt-Console': false,
+            'Web-Scripting-Tools': false,
+            'Web-WMI': false,
+          });
+
+          // State for the generated PowerShell script
+          const [powershellScript, setPowershellScript] = useState('');
+          // State for showing the script area
+          const [showScriptArea, setShowScriptArea] = useState(false);
+          // State for copy button feedback
+          const [copyFeedback, setCopyFeedback] = useState('');
+
+          // Function to handle checkbox changes
+          const handleFeatureChange = (event) => {
+            const { name, checked } = event.target;
+            setSelectedFeatures(prevFeatures => ({
+              ...prevFeatures,
+              [name]: checked,
+            }));
+          };
+
+          // Function to generate the PowerShell script
+          const generateScript = () => {
+            let script = `# PowerShell Script to Install IIS Features\\n`;
+            script += `# Run this script on your Windows Server with Administrative Privileges.\\n\\n`;
+            script += `Write-Host "Starting IIS feature installation..." -ForegroundColor Green\\n\\n`;
+
+            // Filter only selected features and ensure Web-Server is always included if any feature is selected
+            const featuresToInstall = Object.keys(selectedFeatures).filter(feature => selectedFeatures[feature]);
+
+            if (featuresToInstall.length === 0) {
+              script += `Write-Warning "No IIS features selected for installation. Please select features and try again."\\n`;
+            } else {
+              script += `try {\\n`;
+              script += `  Write-Host "Attempting to install: ${featuresToInstall.join(', ')}"\\n`;
+              script += `  Add-WindowsFeature -Name ${featuresToInstall.map(f => `'${f}'`).join(', ')} -IncludeManagementTools -Confirm:$false\\n`;
+              script += `  Write-Host "IIS features installed successfully!" -ForegroundColor Green\\n`;
+              script += `} catch {\\n`;
+              script += `  Write-Error "An error occurred during IIS feature installation: $($_.Exception.Message)"\\n`;
+              script += `  exit 1\\n`; // Exit with an error code
+              script += `}\\n\\n`;
+            }
+
+            script += `# --- Placeholder for subsequent program installations ---\\n`;
+            script += `# After IIS and its selected features are installed, you can add commands here to install other programs.\\n`;
+            script += `# Example: Start-Process -FilePath "C:\\Path\\To\\Your\\Installer.exe" -ArgumentList "/S /INSTALL" -Wait\\n\\n`;
+            script += `Write-Host "Script execution completed." -ForegroundColor Green\\n`;
+
+            setPowershellScript(script);
+            setShowScriptArea(true);
+          };
+
+          // Function to copy the script to clipboard
+          const copyScriptToClipboard = () => {
+            const textarea = document.createElement('textarea');
+            textarea.value = powershellScript;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+              document.execCommand('copy');
+              setCopyFeedback('Copied!');
+            } catch (err) {
+              setCopyFeedback('Failed to copy!');
+            }
+            document.body.removeChild(textarea);
+            setTimeout(() => setCopyFeedback(''), 2000); // Clear feedback after 2 seconds
+          };
+
+          // Function to download the script
+          const downloadScript = () => {
+            const blob = new Blob([powershellScript], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'install_iis.ps1';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          };
+
+          // Helper function to format feature names for display
+          const formatFeatureName = (feature) => {
+            // Specific renames for better readability
+            if (feature === 'Web-Dyn-Compression') return 'Dynamic Content Compression';
+            if (feature === 'Web-Net-Ext') return '.NET Extensibility 3.5';
+            if (feature === 'Web-Net-Ext45') return '.NET Extensibility 4.8';
+            if (feature === 'Web-AppInit') return 'Application Initialization';
+            if (feature === 'Web-ASP') return 'ASP';
+            if (feature === 'Web-Asp-Net') return 'ASP.NET 3.5';
+            if (feature === 'Web-Asp-Net45') return 'ASP.NET 4.8';
+            if (feature === 'Web-CGI') return 'CGI';
+            if (feature === 'Web-ISAPI-Ext') return 'ISAPI Extensions';
+            if (feature === 'Web-ISAPI-Filter') return 'ISAPI Filters';
+            if (feature === 'Web-Includes') return 'Server Side Includes';
+            if (feature === 'Web-WebSockets') return 'WebSocket Protocol';
+            if (feature === 'Web-Windows-Auth') return 'Windows Authentication';
+            if (feature === 'Web-Stat-Content') return 'Static Content';
+            if (feature === 'Web-Request-Filtering') return 'Request Filtering';
+            if (feature === 'Web-Basic-Auth') return 'Basic Authentication';
+            if (feature === 'Web-CertProvider') return 'Centralized SSL Certificate Support';
+            if (feature === 'Web-Client-Auth') return 'Client Certificate Mapping Authentication';
+            if (feature === 'Web-Digest-Auth') return 'Digest Authentication';
+            if (feature === 'Web-Cert-Auth') return 'IIS Client Certificate Mapping Authentication';
+            if (feature === 'Web-IP-Security') return 'IP and Domain Restrictions';
+            if (feature === 'Web-Url-Auth') return 'URL Authorization';
+            // Default formatting for other features
+            return feature.replace('Web-', '').replace(/-/g, ' ');
+          };
+
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-800 to-indigo-900 text-white p-4 sm:p-8 flex items-center justify-center font-inter">
+              <div className="bg-gray-800 bg-opacity-70 backdrop-blur-sm p-6 sm:p-10 rounded-xl shadow-2xl w-full max-w-4xl border border-purple-700">
+                <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-purple-300">
+                  Windows Server Automation Assistant
+                </h1>
+                <p className="text-center text-lg mb-8 text-gray-300">
+                  Generate a PowerShell script to install IIS features on your Windows Server.
+                </p>
+
+                <div className="mb-8 p-4 bg-gray-700 rounded-lg shadow-inner">
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-purple-200">
+                    Select IIS Features
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Object.keys(selectedFeatures).map((feature) => (
+                      <label key={feature} className="flex items-center space-x-3 cursor-pointer text-gray-200 hover:text-white transition duration-200">
+                        <input
+                          type="checkbox"
+                          name={feature}
+                          checked={selectedFeatures[feature]}
+                          onChange={handleFeatureChange}
+                          className="form-checkbox h-5 w-5 text-purple-500 rounded-md focus:ring-purple-400 border-gray-500 bg-gray-600 cursor-pointer"
+                        />
+                        <span className="text-base sm:text-lg">
+                          {formatFeatureName(feature)}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-center mb-8">
+                  <button
+                    onClick={generateScript}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition-transform duration-300 ease-in-out hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-75"
+                  >
+                    Generate PowerShell Script
+                  </button>
+                </div>
+
+                {showScriptArea && (
+                  <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+                    <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-purple-200">
+                      Generated PowerShell Script
+                    </h2>
+                    <textarea
+                      className="w-full h-64 p-4 mb-4 font-mono text-sm bg-gray-900 text-green-300 rounded-md resize-y border border-gray-600 focus:outline-none focus:border-purple-500"
+                      value={powershellScript}
+                      readOnly
+                    ></textarea>
+                    <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+                      <button
+                        onClick={copyScriptToClipboard}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out hover:scale-105 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-75"
+                      >
+                        Copy Script {copyFeedback && <span className="ml-2 text-sm">{copyFeedback}</span>}
+                      </button>
+                      <button
+                        onClick={downloadScript}
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out hover:scale-105 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-75"
+                      >
+                        Download .ps1
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        };
+
+        // Render the App component into the 'root' div
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
